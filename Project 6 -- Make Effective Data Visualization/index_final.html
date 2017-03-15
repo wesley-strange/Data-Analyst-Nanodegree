@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset = "utf-8">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+	<style>
+		body {
+			width: 810px;
+			height: 1000px;
+		    margin: auto;
+		}
+
+		div {
+			width: 805px;
+			height: 1400px;
+		    margin: auto;
+		    position: absolute;
+		}
+
+		svg {
+			position: absolute;
+			width: 800px;
+			height: 500px;
+			left: 5px;
+			opacity: 0.5;
+			margin-top: 30px;
+		}
+
+		h1 {
+			font-size: 24px;
+		    text-align: center;
+		}
+
+		summary {
+			font-size: 14px;
+			text-align: left;
+		}
+
+		button {
+			background-color: white;
+			color: black;
+			padding: 5px;
+			margin: 7px;
+			border-radius: 0px;
+			border-width: 1px;
+			font-size: 16px;
+			border-style: solid;
+			opacity: 0;
+			border-color: darkGray;
+		}
+
+		button.firstClassButton {
+			position: absolute;
+			top: 575px;
+			left: 174px;
+			width: 150px;
+		}
+
+		button.secondClassButton {
+			position: absolute;
+			top: 575px;
+			left: 323px;
+			width: 150px;
+		}
+
+		button.thirdClassButton {
+			position: absolute;
+			top: 575px;
+			left: 472px;
+			width: 150px;
+			background: black;
+			color: white;
+		}
+
+		button.startAnimationButton {
+			position: absolute;
+			background-color: #9AB2DE;
+			color: black;
+			padding: 10px;
+			margin: 7px;
+			border-radius: 10px;
+			border-width: 1px;
+			border-color: #35356E;
+			font-size: 30px;
+			top: 245px;
+			left: 230px;
+			opacity: 1;
+		}
+
+		button.viewByCountButton {
+			position: absolute;
+			top: 545px;
+			left: 174px;
+			width: 225px;
+		}
+
+		button.viewByPercentageButton {
+			position: absolute;
+			top: 545px;
+			left: 398px;
+			width: 224px;
+			background: black;
+			color: white;
+		}
+
+		text.percentageText {
+			position: absolute;	
+			top: 28px;
+			left: 442px;
+			font-size: 30px;
+			font-weight: bold;
+			color: #000066;
+		}
+
+		text.line1Text {
+			position: absolute;
+			top: 41px;
+			left: 505px;
+			font-size: 15px;
+			font-weight: bold;
+			color: #000080;
+		}
+
+		text.line2Text {
+			position: absolute;
+			top: 58px;
+			left: 529px;
+			font-size: 15px;
+			color: #606060;
+		}
+
+		text.chartTitle {
+			position: absolute;
+			top: 0px;
+			left: 20px;
+			font-size: 20px;
+			color: black;
+			font-weight: bold;
+		}
+
+		text.flashMessage {
+			position: absolute;
+			background-color: #9AB2DE;
+			color: black;
+			padding: 10px;
+			margin: 7px;
+			border-radius: 10px;
+			border-width: 1px;
+			font-size: 20px;
+			top: 250px;
+			left: 340px;
+			opacity: 0;
+			border-color: #35356E;
+			text-anchor: middle;
+		}
+
+		text.endText {
+			position: absolute;
+			background-color: #9AB2DE;
+			color: black;
+			padding: 10px;
+			margin: 7px;
+			border-radius: 10px;
+			border-width: 1px;
+			font-size: 20px;
+			top: 250px;
+			left: 175px;
+			opacity: 0;
+			border-color: #35356E;
+			text-anchor: middle;
+		}
+
+		rect {
+			opacity: 0;
+		}
+
+		rect.dimple-legend {
+			opacity: 1;
+		}
+	</style>
+	<heading>
+		<h1>Titanic Data Visualization<br><small>By: Wesley Strange</small></h1>
+	</heading>
+	<summary>
+		<p>On April 15, 1912, the Titanic sank after colliding with an iceberg 
+		in the North Atlantic Ocean. More than 1,500 out of 2,224 passengers 
+		and crew on board were killed. One of the reasons for the huge loss of 
+		life was there were not enough lifeboats to accommodate all the people 
+		on board. The purpose of this visualization is to communicate to the 
+		reader that surviving the Titanic disaster was not just luck, but had a 
+		great deal to do with passenger demographics. This visualization 
+		hightlights the role passenger sex and class played in the survival 
+		odds.</p>
+		<p> Please click the button below to begin the simulation. Once the 
+		simulation has ended you will have an opportunity to explore the data 
+		further.</p>
+		<p><u>About the data:</u><br>The dataset contains demographics and 
+		passenger information from a subset (890) of the 2,224 passengers and 
+		crew on board the Titanic. More information about the data can be 
+		found here (https://www.kaggle.com/c/titanic/data).<br><br></p>
+	</summary>
+	<script class="container" type="text/javascript">
+
+		function draw(data) {
+
+		/* 
+			D3.js setup code
+		*/
+
+			"use strict"; // JavaScript code should be executed in "strict mode"
+
+			// append div container to the page to contain the SVG component
+			var myDiv = d3.select("body")
+				.append("div")
+				.attr("class", "div");
+
+			// append SVG component to the page
+			// group the SVG and everything in it with class chart
+			var svg = d3.select(".div")
+						.append("svg")
+						.append("g")
+						.attr("class", "chart");
+
+
+		/*
+			Create buttons and text objects to be used in the visualization
+		*/
+
+			// firstClassButton used to filter data on first class passengers
+			var firstClassButton = d3.select(".div")
+				.append("button")
+				.attr("class", "firstClassButton")
+				.text("First Class");
+
+			// secondClassButton used to filter data on second class passengers
+           	var secondClassButton = d3.select(".div")
+   	 			.append("button")
+   				.attr("class", "secondClassButton")
+   				.text("Second Class");
+
+   			// thirdClassButton used to filter data on third class passengers
+           	var thirdClassButton = d3.select(".div")
+   	 			.append("button")
+   	 			.attr("class", "thirdClassButton")
+   	 			.text("Third Class");
+
+   	 		// endText displays message to reader after the animation ends
+   	 		d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "flashMessage endText")
+		  	    .text("Click the class buttons below to explore the data \
+		  	    	further");
+
+		  	// firstClassFlash briefly displays a first class identifier message
+	  	   	d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "flashMessage firstClassFlash")
+		  	    .text("First Class");
+
+		  	// secondClassFlash briefly displays a second class identifier message
+	  	   	d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "flashMessage secondClassFlash")
+		  	    .text("Second Class");
+
+		  	// thirdClassFlash briefly displays a third class identifier message
+	  	   	d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "flashMessage thirdClassFlash")
+		  	    .text("Third Class");
+
+	  	    // startAnimationButton starts the animation when clicked
+ 			var startAnimationButton = d3.select(".div")
+				.append("button")
+				.attr("class", "startAnimationButton")
+				.text("Click to Start Animation");
+
+			// viewByCountButton allows reader to view the data by count
+			var viewByCountButton = d3.select(".div")
+				.append("button")
+				.attr("class", "viewByCountButton")
+				.text("View by Count");
+
+			// viewByPercentageButton allows reader to view the data by count
+			var viewByPercentageButton = d3.select(".div")
+				.append("button")
+				.attr("class", "viewByPercentageButton")
+				.text("View by Percentage");
+
+			// percentageText displays the percentage value for women survived
+			// text value set to blank initially
+	        d3.select(".div")
+		 	   .append("text")
+		  	   .attr("class", "percentageText")
+		  	   .text("");
+
+		  	// line1Text displays the passenger class value
+		  	// text value set to blank initially
+	        d3.select(".div")
+		 	   .append("text")
+		  	   .attr("class", "line1Text")
+		  	   .text("");
+
+	  	   	// line2Text displays the percentage value for men survived
+	  	   	// text value set to blank initially
+  	    	d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "line2Text")
+		  	    .text("");
+
+  	    	// chartTitle displays the chart title
+	  	   	d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "chartTitle")
+		  	    .text("Passenger Survival Odds by Class and Sex");
+
+
+  	    /*
+  	    	Functions used to update the visualization text during the 
+  	    	animation and as the reader interacts with the visualization.
+  	    */
+
+  	    	// function to update the percentageText value
+	        function update_percentageText(data, left) {
+	        	d3.select(".percentageText")
+	        	  .data(data)
+        		  .text(data)
+        		  .style("left", left);
+	        };
+
+	        // function to update the line1Text value
+	        function update_line1Text(data, left) {
+	        	d3.select(".line1Text")
+	        	  .data(data)
+        		  .text(data)
+        		  .style("left", left);
+	        };
+
+	        // function to update the line2Text value
+	        function update_line2Text(data) {
+	        	d3.select(".line2Text")
+	        	  .data(data)
+        		  .text(data);
+	        }
+
+
+        /*
+        	Function used to start the animation when the user clicks the 
+        	startAnimationButton on the screen.
+        */
+			startAnimationButton.on("click", function(d) {
+				// change the startAnimationButton opacity to 0 so it disappears
+        		d3.select(".startAnimationButton")
+	        	  .data(data)
+	        	  .transition()
+	        	  .duration(200)
+        		  .style("opacity", 0);
+
+        		// change the svg opacity to 1
+        		d3.select("svg")
+        		  .transition()
+        		  .duration(500)
+        		  .style("opacity", 1);
+
+        		// change the bars opacity to 1 to make them viewable
+        		d3.selectAll("rect")
+        		  .transition()
+        		  .duration(500)
+				  .style("opacity", 1);
+
+        		// start animation
+				myStoryboard.startAnimation();
+        	});
+
+
+	    /*
+	    	Function to add the interative buttons to the screen once the 
+	    	visualization is over. Also, displays a message to the reader 
+	    	directing them to use the interactive buttons to explere the data.
+	    */
+
+	        function add_buttons_text() {
+	        	d3.select(".endText")
+        		  .style("opacity", "1");
+
+        		setTimeout(function(d) {
+        			d3.select(".endText")
+        		  	  .style("opacity", "0");
+        		}, 5000);
+
+	        	d3.select(".firstClassButton")
+	        	  .data(data)
+        		  .style("opacity", "1");
+
+        		d3.select(".secondClassButton")
+	        	  .data(data)
+        		  .style("opacity", "1");
+
+        		d3.select(".thirdClassButton")
+	        	  .data(data)
+        		  .style("opacity", "1");
+
+        		d3.select(".viewByCountButton")
+				  .data(data)
+				  .style("opacity", "1");
+
+				d3.select(".viewByPercentageButton")
+				  .data(data)
+				  .style("opacity", "1");
+	        }
+
+
+	    /*
+	    	Functions used to style the Class buttons when they are clicked.
+	    */
+
+	    	// change firstClassButton to black backgrount / white text
+	    	// change other class buttons white backgrount / black text
+	        function style_firstClassButton() {
+	        	d3.select(".firstClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+
+        		d3.select(".secondClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+    		  	d3.select(".thirdClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+	        };
+
+	        // change secondClassButton to black backgrount / white text
+	    	// change other class buttons white backgrount / black text
+	        function style_secondClassButton() {
+	        	d3.select(".firstClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+        		d3.select(".secondClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+
+    		  	d3.select(".thirdClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+	        };
+
+	        // change thirdClassButton to black backgrount / white text
+	    	// change other class buttons white backgrount / black text
+	        function style_thirdClassButton() {
+	        	d3.select(".firstClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+        		d3.select(".secondClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+    		  	d3.select(".thirdClassButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+	        }
+
+
+        /* 
+        	Functions used to style the view by buttons when they are clicked.
+    	*/
+
+    		// change viewByCountButton to black backgrount / white text
+	    	// change viewByPercentageButton to white backgrount / black text
+	        function style_viewByCountButton() {
+	        	d3.select(".viewByCountButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+
+        		d3.select(".viewByPercentageButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+	        }
+
+	        // change viewByPercentageButton to black backgrount / white text
+	    	// change viewByCountButton to white backgrount / black text
+	        function style_viewByPercentageButton() {
+	        	d3.select(".viewByPercentageButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+
+        		d3.select(".viewByCountButton")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+	        }
+
+
+	    /*
+	    	Functions used to style the buttons as they are hovered over.
+	    	- changes the button's border color to black when hovered over.
+	    	- returns the button's border color to darkGray when mouse leaves.
+	    */
+
+	    	firstClassButton.on("mouseover", function(d) {
+				d3.select(".firstClassButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			firstClassButton.on("mouseleave", function(d) {
+				d3.select(".firstClassButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+			secondClassButton.on("mouseover", function(d) {
+				d3.select(".secondClassButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			secondClassButton.on("mouseleave", function(d) {
+				d3.select(".secondClassButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+			thirdClassButton.on("mouseover", function(d) {
+				d3.select(".thirdClassButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			thirdClassButton.on("mouseleave", function(d) {
+				d3.select(".thirdClassButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+			startAnimationButton.on("mouseover", function(d) {
+				d3.select(".startAnimationButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			startAnimationButton.on("mouseleave", function(d) {
+				d3.select(".startAnimationButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+			viewByCountButton.on("mouseover", function(d) {
+				d3.select(".viewByCountButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			viewByCountButton.on("mouseleave", function(d) {
+				d3.select(".viewByCountButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+			viewByPercentageButton.on("mouseover", function(d) {
+				d3.select(".viewByPercentageButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			viewByPercentageButton.on("mouseleave", function(d) {
+				d3.select(".viewByPercentageButton")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+
+		/*
+			Functions used to manipulate the chart, supportive text, and
+			button styles as the reader interacts with the visualization.
+		*/
+
+			// change the frame and text to the first class passenger values
+			firstClassButton.on("click", function(d) {
+				frame = "1";
+				style_firstClassButton(); // style class buttons
+				update_percentageText("97%", "449px");
+				update_line1Text("of First Class women survived,", "512px");
+				update_line2Text("compared to just 37% of men.");
+				myStoryboard.goToFrame(frame); // change chart to frame 1
+				myStoryboard.pauseAnimation();
+			});
+
+			// change the frame and text to the second class passenger values
+        	secondClassButton.on("click", function(d) {
+        		frame = "2";
+				style_secondClassButton(); // style class buttons
+				update_percentageText("92%", "434px");
+				update_line1Text("of Second Class women survived,", "497px");
+				update_line2Text("compared to just 16% of men.");
+				myStoryboard.goToFrame(frame); // change chart to frame 2
+				myStoryboard.pauseAnimation();
+			});
+
+        	// change the frame and text to the third class passenger values
+        	thirdClassButton.on("click", function(d) {
+        		frame = "3";
+        		style_thirdClassButton(); // style class buttons
+        		update_percentageText("50%", "442px");
+				update_line1Text("of Third Class women survived,", "505px");
+				update_line2Text("compared to just 14% of men.");
+				myStoryboard.goToFrame(frame); // change chart to frame 3
+				myStoryboard.pauseAnimation();
+        	});
+
+        	// Update the chart after the viewByCountButton is clicked
+			viewByCountButton.on("click", function(d) {
+				// style view by buttons
+				style_viewByCountButton(); 
+
+				// change showPercent value to false to show count values
+        		y.showPercent = false;
+
+        		// update the y-axis title
+        		y.title = "Number of Passengers";
+
+        		// hide the percentageText
+        		d3.select(".percentageText")
+        		  .transition()
+        		  .duration(250)
+        		  .style("opacity", "0");
+
+        		// hide the line1Text
+        		d3.select(".line1Text")
+        		  .transition()
+        		  .duration(250)
+        		  .style("opacity", "0");
+
+        		// hide the line2Text
+        		d3.select(".line2Text")
+        		  .transition()
+        		  .duration(250)
+        		  .style("opacity", "0");
+
+        		// update chart to correct storyboard frame
+        		myStoryboard.goToFrame(frame);
+        	});
+
+			// Update the chart after the viewPercentageButton is clicked
+			viewByPercentageButton.on("click", function(d) {
+				// style view by buttons
+				style_viewByPercentageButton(); 
+
+				// change showPercent value to true to show percentage values
+        		y.showPercent = true;
+
+        		// update the y-axis title
+        		y.title = "Percentage of Passengers";
+
+        		// show the percentageText
+        		d3.select(".percentageText")
+        		  .transition()
+        		  .duration(250)
+        		  .style("opacity", "1");
+
+        		// show the line1Text
+        		d3.select(".line1Text")
+        		  .transition()
+        		  .duration(250)
+        		  .style("opacity", "1");
+
+        		// show the line2Text
+        		d3.select(".line2Text")
+        		  .transition()
+        		  .duration(250)
+        		  .style("opacity", "1");
+
+        		// update the chart to the correct storyboard frame
+        		myStoryboard.goToFrame(frame);
+        	});
+
+			// flashes a message during the animation to identify the class
+        	function flashMessage(message) {
+				d3.select(message)
+				  .transition()
+				  .duration(1000)
+    		      .style("opacity", "1");
+
+    		    setTimeout(function() { 
+					d3.select(message)
+					  .transition()
+					  .duration(1000)
+        		      .style("opacity", "0");
+				}, 2000);
+			}
+
+
+		/*
+			Dimple.js chart construction code
+		*/
+
+			// create dimple chart
+			var myChart = new dimple.chart(svg, data);
+
+			// add x-axis
+			var x = myChart.addCategoryAxis("x", "Sex");
+			x.addOrderRule(["Male", "Female"]);
+			x.fontSize = "14px";
+			x.title = "Passenger Sex";
+
+			// add y-axis
+			var y = myChart.addMeasureAxis("y", "Survived");
+			y.showPercent = true;
+			y.fontSize = "14px";
+			y.title = "Percentage of Passengers";
+			
+			// add bars to the chart
+			var bars = myChart.addSeries("Survived", dimple.plot.bar);
+			bars.aggregate = dimple.aggregateMethod.count;
+			bars.barGap = 0.1;
+
+			// remove the tooltip text from the chart
+			bars.getTooltipText = function(e) {
+				return [
+					null
+				];
+			};
+
+			// change the default bar colors to shades of blue and gray
+			myChart.defaultColors = [
+				new dimple.color("#6495ED", "#000080"),
+				new dimple.color("#D0D0D0", "#606060")
+			];
+
+			// add legend
+			var legend = myChart.addLegend("2%", "1%", 200, 25, "left");
+			legend.fontSize = "14px";
+
+			legend._getEntries = function () {
+
+				// Create an array of distinct series values
+				var entries = [];
+
+				// Change the legend key from "0" to "Died"
+				entries.push({
+					key : "Died",
+                    fill : myChart.getColor("0").fill,
+                    stroke : myChart.getColor("0").stroke,
+                    series : bars,
+                    aggField : "0"
+				});
+
+				// Change the legend key from "1" to "Survived"
+				entries.push({
+					key : "Survived",
+                    fill : myChart.getColor("1").fill,
+                    stroke : myChart.getColor("1").stroke,
+                    series : bars,
+                    aggField : "1"
+				});
+
+				return entries;
+			};
+
+			// initialize ticks and frame variables
+			var ticks = 1;
+			var frame = "3";
+
+			function onTick(d) {
+				// remove the storyboard label from chart
+				myStoryboard.storyLabel.remove();
+
+				// if ticks is equal to 1, update the chart w/ third class info
+				if (ticks === 1) {
+					// flash third class message
+					flashMessage(".thirdClassFlash");
+
+					update_percentageText("50%", "442px");
+					update_line1Text("of Third Class women survived,", "505px");
+					update_line2Text("compared to just 14% of men.");			
+				}
+
+				// if ticks is equal to 2, update the chart w/ second class info
+				else if (ticks === 2) {
+					// flash second class message
+					flashMessage(".secondClassFlash");
+				
+					update_percentageText("92%", "434px");
+					update_line1Text("of Second Class women survived,", "497px");
+					update_line2Text("compared to just 16% of men.");
+				}
+
+				// if ticks is equal to 3, update the chart w/ first class info
+				else if (ticks === 3) {
+					// flash first class message
+					flashMessage(".firstClassFlash");
+
+					update_percentageText("97%", "449px");
+					update_line1Text("of First Class women survived,", "512px");
+					update_line2Text("compared to just 37% of men.");	
+				}
+
+				// if ticks is equal to 4, update the chart w/ third class info,
+				//   add the buttons to the screen, and stop the animation
+				else if (ticks === 4) {
+					update_percentageText("50%");
+					update_line1Text("of Third Class women survived,");
+					update_line2Text("compared to just 14% of men.");
+					myStoryboard.stopAnimation();
+					setTimeout(function() { 
+						add_buttons_text();
+					}, 10);
+				}
+
+				ticks += 1;
+			}
+
+			// create storyboard to animate through the data by passenger class
+			var myStoryboard = myChart.setStoryboard("Pclass", onTick);
+			myStoryboard.autoplay = false; 
+			myStoryboard.frameDuration = 7500; // frame duration set to 7.5 sec
+			// animation order: third class -> first class
+			myStoryboard.addOrderRule("Pclass", true);
+
+			myChart.draw(); // draw the chart
+		}
+	</script>
+</head>
+<body>
+	<script type="text/javascript">
+		/*
+			Use D3 to load the CSV file and pass contents to the draw function
+		*/
+			d3.csv("titanic_data.csv", function(d) {
+
+				// Capitalize Sex values
+				if(d["Sex"] === "male") {
+					d["Sex"] = "Male";
+				} else {
+					d["Sex"] = "Female";
+				};
+
+				return d; // return updated data
+
+			}, draw); // calls the draw function
+	</script>
+</body>
+</html>

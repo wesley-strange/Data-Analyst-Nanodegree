@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset = "utf-8">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+	<style>
+		body {
+			width: 810px;
+			height: 1000px;
+		    margin: auto;
+		}
+
+		div {
+			width: 805px;
+			height: 1400px;
+		    margin: auto;
+		    position: absolute;
+		}
+
+		svg {
+			position: absolute;
+			width: 800px;
+			height: 500px;
+			left: 5px;
+			opacity: 0.5;
+		}
+
+		h1 {
+			font-size: 24px;
+		    text-align: center;
+		}
+
+		h2 {
+			font-size: 20px;
+		    text-align: center;
+		}
+
+		summary {
+			font-size: 14px;
+			text-align: left;
+		}
+
+		button {
+			background-color: white;
+			color: black;
+			padding: 5px;
+			margin: 7px;
+			border-radius: 5px;
+			border-width: 1px;
+			font-size: 16px;
+			border-style: solid;
+			opacity: 0;
+			border-color: darkGray;
+		}
+
+		button.button1 {
+			position: absolute;
+			top: 505px;
+			left: 188px;
+		}
+
+		button.button2 {
+			position: absolute;
+			top: 505px;
+			left: 345px;
+		}
+
+		button.button3 {
+			position: absolute;
+			top: 505px;
+			left: 510px;
+		}
+
+		button.button4 {
+			position: absolute;
+			background-color: lightGray;
+			color: black;
+			padding: 10px;
+			margin: 7px;
+			border-radius: 10px;
+			border-width: 1px;
+			font-size: 30px;
+			top: 215px;
+			left: 230px;
+			opacity: 1;
+		}
+
+		text.perc {
+			position: absolute;	
+			top: 325px;
+			left: 425px;
+			font-size: 70px;
+			font-weight: bold;
+			color: #000066;
+		}
+
+		text.line1 {
+			position: absolute;
+			top: 393px;
+			left: 425px;
+			font-size: 20px;
+			font-weight: bold;
+			color: #000066;
+		}
+
+		text.line2 {
+			position: absolute;
+			top: 415px;
+			left: 425px;
+			font-size: 20px;
+			color: #303030;
+		}
+
+		text.end {
+			position: absolute;
+			background-color: lightGray;
+			color: black;
+			padding: 10px;
+			margin: 7px;
+			border-radius: 10px;
+			border-width: 1px;
+			font-size: 20px;
+			top: 220px;
+			left: 160px;
+			opacity: 0;
+			border-color: darkGray;
+		}
+
+	</style>
+	<heading>
+		<h1>Titanic Data Visualization<br><small>By: Wesley Strange</small></h1>
+	</heading>
+	<summary>
+		<p>On April 15, 1912, the Titanic sank after colliding with an iceberg 
+		in the North Atlantic Ocean. More than 1,500 out of 2,224 passengers 
+		and crew on board were killed. One of the reasons for the huge loss of 
+		life was there were not enough lifeboats to accommodate all of the 
+		people on board.</p>
+		<p>The purpose of this visualization is to communicate to the reader 
+		that surviving the Titanic disaster was not just luck, but had a great 
+		deal to do with demographics. For example, women (especially women in 
+		First or Second Class) had a much greater chance of survival than men.</p>
+		<p> Please click the button below to begin the simulation. Once the 
+		simulation has ended you will have an opportunity to explore the data 
+		further.</p>
+	</summary>
+	<script class="container" type="text/javascript">
+
+		function draw(data) {
+
+		/* 
+			D3.js setup code
+		*/
+
+			"use strict"; // JavaScript code should be executed in "strict mode"
+
+			var myDiv = d3.select("body")
+				.append("div")
+				.attr("class", "div");
+
+			// append SVG component to the page
+			// group the SVG and everything in it with class chart
+			var svg = d3.select(".div")
+						.append("svg")
+						.append("g")
+						.attr("class", "chart");
+
+			var button1 = d3.select(".div")
+				.append("button")
+				.attr("class", "button1")
+				.text("First Class");
+
+           	var button2 = d3.select(".div")
+   	 			.append("button")
+   				.attr("class", "button2")
+   				.text("Second Class");
+
+           	var button3 = d3.select(".div")
+   	 			.append("button")
+   	 			.attr("class", "button3")
+   	 			.text("Third Class");
+
+   	 		d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "end")
+		  	    .attr("id", "end")
+		  	    .text("Click the class buttons below to explore the data \
+		  	    	further");
+
+ 			var button4 = d3.select(".div")
+				.append("button")
+				.attr("class", "button4")
+				.text("Click to Start Animation");
+
+			svg.append("text")
+			   .attr("id", "chartTitle")
+			   .attr("x", 400)             
+	           .attr("y", 30)
+	           .attr("text-anchor", "middle")
+	           .style("font-size", "20px")
+	           .style("font-weight", "bold")
+	           .text("Passenger Survival Odds by Class and Sex");
+
+	        d3.select(".div")
+		 	   .append("text")
+		  	   .attr("class", "perc")
+		  	   .attr("id", "perc")
+		  	   .text("");
+
+	        d3.select(".div")
+		 	   .append("text")
+		  	   .attr("class", "line1")
+		  	   .attr("id", "line1")
+		  	   .text("");
+
+  	    	d3.select(".div")
+		 	    .append("text")
+		  	    .attr("class", "line2")
+		  	    .attr("id", "line2")
+		  	    .text("");
+
+
+	        function update_perc_text(data) {
+	        	d3.select(".perc")
+	        	  .data(data)
+        		  .transition()
+        		  .duration(1000)
+        		  .text(data);
+	        };
+
+
+	        function update_line1_text(data) {
+	        	d3.select(".line1")
+	        	  .data(data)
+        		  .transition()
+        		  .duration(1000)
+        		  .text(data);
+	        };
+
+
+	        function update_line2_text(data) {
+	        	d3.select(".line2")
+	        	  .data(data)
+        		  .transition()
+        		  .duration(1000)
+        		  .text(data);
+	        }
+
+	        function add_buttons_text() {
+	        	d3.select(".end")
+        		  .style("opacity", "1");
+
+        		setTimeout(function(d) {
+        			d3.select(".end")
+        		  	  .style("opacity", "0");
+        		}, 5000);
+
+	        	d3.select(".button1")
+	        	  .data(data)
+        		  .style("opacity", "1");
+
+        		d3.select(".button2")
+	        	  .data(data)
+        		  .style("opacity", "1");
+
+        		d3.select(".button3")
+	        	  .data(data)
+        		  .style("opacity", "1");
+	        }
+
+
+	        function style_button1() {
+	        	d3.select(".button1")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+
+        		d3.select(".button2")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+    		  	d3.select(".button3")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+	        };
+
+	        function style_button2() {
+	        	d3.select(".button1")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+        		d3.select(".button2")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+
+    		  	d3.select(".button3")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+	        };
+
+	        function style_button3() {
+	        	d3.select(".button1")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+        		d3.select(".button2")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'white')
+        		  .style("color", "black");
+
+    		  	d3.select(".button3")
+        		  .transition()
+        		  .duration(500)
+        		  .style('background', 'black')
+        		  .style("color", "white");
+	        }
+
+			button1.on("click", function(d) {
+				style_button1();
+				update_perc_text("97%");
+				update_line1_text("of First Class women survived,");
+				update_line2_text("compared to just 37% of men.");
+				myStoryboard.goToFrame("1");
+				myStoryboard.pauseAnimation();
+			});
+
+			button1.on("mouseover", function(d) {
+				d3.select(".button1")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			button1.on("mouseleave", function(d) {
+				d3.select(".button1")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+        	button2.on("click", function(d) {
+				style_button2();
+				update_perc_text("92%");
+				update_line1_text("of Second Class women survived,");
+				update_line2_text("compared to just 16% of men.");
+				myStoryboard.goToFrame("2");
+				myStoryboard.pauseAnimation();
+			});
+
+			button2.on("mouseover", function(d) {
+				d3.select(".button2")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			button2.on("mouseleave", function(d) {
+				d3.select(".button2")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+        	button3.on("click", function(d) {
+        		style_button3();
+        		update_perc_text("50%");
+				update_line1_text("of Third Class women survived,");
+				update_line2_text("compared to just 14% of men.");
+				myStoryboard.goToFrame("3");
+				myStoryboard.pauseAnimation();
+        	});
+
+        	button3.on("mouseover", function(d) {
+				d3.select(".button3")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			button3.on("mouseleave", function(d) {
+				d3.select(".button3")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+        	button4.on("click", function(d) {
+        		d3.select(".button4")
+	        	  .data(data)
+	        	  .transition()
+	        	  .duration(250)
+        		  .style("opacity", 0);
+
+        		d3.select("svg")
+        		  .transition()
+        		  .duration(500)
+        		  .style("opacity", 1);
+
+				myStoryboard.startAnimation();
+        	});
+
+        	button4.on("mouseover", function(d) {
+				d3.select(".button4")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "black");
+			});
+
+			button4.on("mouseleave", function(d) {
+				d3.select(".button4")
+        		  .transition()
+        		  .duration(250)
+        		  .style("border-color", "darkGray");
+			});
+
+		/*
+			Dimple.js chart construction code
+		*/
+
+			var myChart = new dimple.chart(svg, data);
+
+			var x = myChart.addCategoryAxis("x", "Sex");
+			x.addOrderRule(["Male", "Female"]);
+			x.fontSize = "16px";
+			x.title = "Passenger Sex";
+
+			var y = myChart.addMeasureAxis("y", "Survived");
+			y.showPercent = true;
+			y.fontSize = "16px";
+			y.title = "Percentage of Passengers";
+						   
+			var bars = myChart.addSeries("Survived", dimple.plot.bar);
+			bars.aggregate = dimple.aggregateMethod.count;
+			bars.barGap = 0.1;
+
+			var legend = myChart.addLegend("90%", "10%", 100, 50, "left");
+			legend.fontSize = "14px";
+			
+			legend._getEntries = function () {
+
+				// Create an array of distinct series values
+				var entries = [];
+
+				// Change the legend key from "0" to "Died"
+				entries.push({
+					key : "Died",
+                    fill : myChart.getColor("0").fill,
+                    stroke : myChart.getColor("0").stroke,
+                    series : bars,
+                    aggField : "0"
+				});
+
+				// Change the legend key from "1" to "Survived"
+				entries.push({
+					key : "Survived",
+                    fill : myChart.getColor("1").fill,
+                    stroke : myChart.getColor("1").stroke,
+                    series : bars,
+                    aggField : "1"
+				});
+
+				return entries;
+			};
+
+
+			var ticks = 1;
+
+			function onTick(d) {
+				myStoryboard.storyLabel.remove();
+
+				if (ticks === 1) {
+					update_perc_text("50%");
+					update_line1_text("of Third Class women survived,");
+					update_line2_text("compared to just 14% of men.");
+				}
+
+				if (ticks === 2) {
+					update_perc_text("92%");
+					update_line1_text("of Second Class women survived,");
+					update_line2_text("compared to just 16% of men.");
+				}
+
+				if (ticks === 3) {
+					update_perc_text("97%");
+					update_line1_text("of First Class women survived,");
+					update_line2_text("compared to just 37% of men.");	
+				}
+
+				if (ticks === 4) {
+					update_perc_text(" ");
+					update_line1_text(" ");
+					update_line2_text(" ");
+					myStoryboard.stopAnimation();
+					setTimeout(function() { 
+						add_buttons_text();
+					}, 10);
+				}
+
+				ticks += 1;
+			}
+
+			var myStoryboard = myChart.setStoryboard("Pclass", onTick);
+			myStoryboard.autoplay = false;
+			myStoryboard.frameDuration = 10000;
+			myStoryboard.addOrderRule("Pclass", true);
+
+			myChart.draw();
+		}
+
+	</script>
+</head>
+<body>
+	<script type="text/javascript">
+		/*
+			Use D3 to load the CSV file and pass contents to the draw function
+		*/
+			d3.csv("titanic_data.csv", function(d) {
+
+				// Capitalize Sex values
+				if(d["Sex"] === "male") {
+					d["Sex"] = "Male";
+				} else {
+					d["Sex"] = "Female";
+				};
+
+				return d; // return updated data
+
+			}, draw);
+	</script>
+</body>
+</html>
